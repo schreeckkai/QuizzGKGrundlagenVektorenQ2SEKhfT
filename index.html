@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathe Schreck - Vektor Quiz (Spaltenform)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            options: {
+                enableMenu: false
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        .accent-bg { background-color: #E63946; }
+        .accent-text { color: #E63946; }
+        .accent-border { border-color: #E63946; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div id="app" class="max-w-3xl w-full bg-slate-800 rounded-2xl shadow-2xl p-6 md:p-10 border border-slate-700">
+        <!-- Dynamischer Inhalt -->
+    </div>
+
+    <script>
+        const QUIZ_ID = "VEK_Q2_HMF_2026_V2";
+        const LOCK_TIME = 10 * 60 * 1000; 
+
+        const quizData = [
+            {
+                question: "Aufgabe 1: Gegeben sind $A(2|0|1)$ und $B(5|2|1)$. Welcher Vektor $\\vec{AB}$ verbindet sie?",
+                points: 1, af: "AF 1",
+                answerOptions: [
+                    { text: "$\\begin{pmatrix} 3 \\\\ 2 \\\\ 0 \\end{pmatrix}$", rationale: "Richtig! $\\begin{pmatrix} 5-2 \\\\ 2-0 \\\\ 1-1 \\end{pmatrix} = \\begin{pmatrix} 3 \\\\ 2 \\\\ 0 \\end{pmatrix}$.", isCorrect: true },
+                    { text: "$\\begin{pmatrix} 7 \\\\ 2 \\\\ 2 \\end{pmatrix}$", rationale: "Falsch: Du hast die Koordinaten addiert statt subtrahiert.", isCorrect: false },
+                    { text: "$\\begin{pmatrix} -3 \\\\ -2 \\\\ 0 \\end{pmatrix}$", rationale: "Falsch: Das wäre der Vektor $\\vec{BA}$ (Anfang minus Ende).", isCorrect: false }
+                ]
+            },
+            {
+                question: "Aufgabe 11: Wie lautet der Gegenvektor zu $\\vec{v} = \\begin{pmatrix} -4 \\\\ 1 \\\\ 0 \\end{pmatrix}$?",
+                points: 1, af: "AF 1",
+                answerOptions: [
+                    { text: "$\\begin{pmatrix} 4 \\\\ -1 \\\\ 0 \\end{pmatrix}$", rationale: "Korrekt! Alle Vorzeichen wurden invertiert.", isCorrect: true },
+                    { text: "$\\begin{pmatrix} 4 \\\\ 1 \\\\ 0 \\end{pmatrix}$", rationale: "Falsch: Nur das erste Vorzeichen wurde geändert.", isCorrect: false },
+                    { text: "$\\begin{pmatrix} 0 \\\\ 0 \\\\ 0 \\end{pmatrix}$", rationale: "Falsch: Das ist der Nullvektor.", isCorrect: false }
+                ]
+            },
+            {
+                question: "Aufgabe 21: Berechne den Betrag des Vektors $\\vec{a} = \\begin{pmatrix} 3 \\\\ 0 \\\\ 4 \\end{pmatrix}$.",
+                points: 1, af: "AF 1",
+                answerOptions: [
+                    { text: "$5$", rationale: "Richtig! $\\sqrt{3^2 + 0^2 + 4^2} = \\sqrt{9+16} = 5$.", isCorrect: true },
+                    { text: "$7$", rationale: "Falsch: Du hast $3+4$ gerechnet, statt die Quadrate zu addieren.", isCorrect: false },
+                    { text: "$\\sqrt{7}$", rationale: "Falsch: Du hast die Komponenten addiert und daraus die Wurzel gezogen.", isCorrect: false }
+                ]
+            },
+            {
+                question: "Aufgabe 34: Berechne $\\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix} + 2 \\cdot \\begin{pmatrix} 0 \\\\ -1 \\\\ 2 \\end{pmatrix}$.",
+                points: 1, af: "AF 1",
+                answerOptions: [
+                    { text: "$\\begin{pmatrix} 1 \\\\ 0 \\\\ 7 \\end{pmatrix}$", rationale: "Richtig! $\\begin{pmatrix} 1+0 \\\\ 2-2 \\\\ 3+4 \\end{pmatrix} = \\begin{pmatrix} 1 \\\\ 0 \\\\ 7 \\end{pmatrix}$.", isCorrect: true },
+                    { text: "$\\begin{pmatrix} 1 \\\\ 1 \\\\ 5 \\end{pmatrix}$", rationale: "Falsch: Du hast den Faktor 2 beim zweiten Vektor ignoriert.", isCorrect: false },
+                    { text: "$\\begin{pmatrix} 2 \\\\ 0 \\\\ 10 \\end{pmatrix}$", rationale: "Falsch: Du hast auch den ersten Vektor verdoppelt.", isCorrect: false }
+                ]
+            },
+            {
+                question: "Aufgabe 41: Prüfe die Kollinearität: $\\vec{a}=\\begin{pmatrix} 2 \\\\ -1 \\\\ 4 \\end{pmatrix}$ und $\\vec{b}=\\begin{pmatrix} -4 \\\\ 2 \\\\ -8 \\end{pmatrix}$.",
+                points: 1, af: "AF 1",
+                answerOptions: [
+                    { text: "Kollinear mit $k = -2$", rationale: "Richtig! Jede Komponente von $\\vec{a}$ mal $-2$ ergibt $\\vec{b}$.", isCorrect: true },
+                    { text: "Nicht kollinear", rationale: "Falsch: Achte auf die Vorzeichen, der Faktor $-2$ passt überall.", isCorrect: false },
+                    { text: "Kollinear mit $k = 2$", rationale: "Falsch: Dann müssten die Vorzeichen identisch sein.", isCorrect: false }
+                ]
+            },
+            {
+                question: "Aufgabe 51: Welcher Vektor steht senkrecht auf $\\vec{v} = \\begin{pmatrix} 1 \\\\ 2 \\\\ 0 \\end{pmatrix}$?",
+                points: 1, af: "AF 1",
+                answerOptions: [
+                    { text: "$\\begin{pmatrix} -2 \\\\ 1 \\\\ 5 \\end{pmatrix}$", rationale: "Richtig! $1\\cdot(-2) + 2\\cdot 1 + 0\\cdot 5 = 0$.", isCorrect: true },
+                    { text: "$\\begin{pmatrix} 1 \\\\ 2 \\\\ 0 \\end{pmatrix}$", rationale: "Falsch: Das ist derselbe Vektor, sie sind parallel.", isCorrect: false },
+                    { text: "$\\begin{pmatrix} 2 \\\\ 1 \\\\ 0 \\end{pmatrix}$", rationale: "Falsch: Das Skalarprodukt ergibt 4, nicht 0.", isCorrect: false }
+                ]
+            },
+            {
+                question: "Aufgabe 58: Bestimme den Einheitsvektor $\\vec{a}_0$ zu $\\vec{a} = \\begin{pmatrix} 0 \\\\ 3 \\\\ 4 \\end{pmatrix}$.",
+                points: 2, af: "AF 2",
+                answerOptions: [
+                    { text: "$\\begin{pmatrix} 0 \\\\ 0,6 \\\\ 0,8 \\end{pmatrix}$", rationale: "Richtig! Länge ist 5, also $\\frac{1}{5} \\cdot \\vec{a}$.", isCorrect: true },
+                    { text: "$\\begin{pmatrix} 0 \\\\ 1 \\\\ 1 \\end{pmatrix}$", rationale: "Falsch: Komponenten einfach auf 1 zu setzen ist mathematisch falsch.", isCorrect: false },
+                    { text: "$\\begin{pmatrix} 0 \\\\ 3 \\\\ 4 \\end{pmatrix}$", rationale: "Falsch: Das ist der Vektor selbst mit Länge 5.", isCorrect: false }
+                ]
+            },
+            {
+                question: "Aufgabe 61: Mittelpunkt $M$ von $A(1|1|1)$ und $B(3|5|7)$.",
+                points: 2, af: "AF 2",
+                answerOptions: [
+                    { text: "$M(2|3|4)$", rationale: "Richtig! $\\frac{1+3}{2}=2, \\frac{1+5}{2}=3, \\frac{1+7}{2}=4$.", isCorrect: true },
+                    { text: "$M(4|6|8)$", rationale: "Falsch: Du hast nur addiert, aber nicht durch 2 geteilt.", isCorrect: false },
+                    { text: "$M(1|2|3)$", rationale: "Falsch: Rechenfehler bei der Mittelwertbildung.", isCorrect: false }
+                ]
+            },
+            {
+                question: "Aufgabe 68: Stelle $\\vec{c}=\\begin{pmatrix} 5 \\\\ 5 \\\\ 5 \\end{pmatrix}$ als Linearkombination von $\\vec{a}=\\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix}$ und $\\vec{b}=\\begin{pmatrix} 2 \\\\ 2 \\\\ 2 \\end{pmatrix}$ dar.",
+                points: 2, af: "AF 2",
+                answerOptions: [
+                    { text: "$1 \\cdot \\vec{a} + 2 \\cdot \\vec{b}$", rationale: "Korrekt! $(1+4, 1+4, 1+4) = (5, 5, 5)$.", isCorrect: true },
+                    { text: "$5 \\cdot \\vec{a} + 5 \\cdot \\vec{b}$", rationale: "Falsch: Das ergäbe $(15, 15, 15)$.", isCorrect: false },
+                    { text: "Nicht möglich", rationale: "Falsch: Da $\\vec{a}$ und $\\vec{b}$ parallel sind, gibt es unendlich viele Lösungen.", isCorrect: false }
+                ]
+            },
+            {
+                question: "Aufgabe 71: Für welches $x$ sind $\\vec{a}=\\begin{pmatrix} x \\\\ 2 \\\\ 1 \\end{pmatrix}$ und $\\vec{b}=\\begin{pmatrix} 2 \\\\ -4 \\\\ 2 \\end{pmatrix}$ orthogonal?",
+                points: 2, af: "AF 2",
+                answerOptions: [
+                    { text: "$3$", rationale: "Richtig! $2x - 8 + 2 = 0 \\implies 2x = 6 \\implies x = 3$.", isCorrect: true },
+                    { text: "$4$", rationale: "Falsch: Einsetzprobe ergibt $8-8+2=2 \\neq 0$.", isCorrect: false },
+                    { text: "$-3$", rationale: "Falsch: Vorzeichenfehler beim Auflösen der Gleichung.", isCorrect: false }
+                ]
+            },
+            {
+                question: "Aufgabe 75: Wie lautet der Ansatz zur Winkelberechnung zwischen $\\vec{a}$ und $\\vec{b}$?",
+                points: 2, af: "AF 2",
+                answerOptions: [
+                    { text: "$\\cos(\\alpha) = \\frac{\\vec{a} \\cdot \\vec{b}}{|\\vec{a}| \\cdot |\\vec{b}|}$", rationale: "Richtig! Das ist die Standardformel.", isCorrect: true },
+                    { text: "$\\cos(\\alpha) = \\vec{a} \\cdot \\vec{b}$", rationale: "Falsch: Die Normierung durch die Längen fehlt.", isCorrect: false },
+                    { text: "$\\alpha = \\vec{a} \\cdot \\vec{b}$", rationale: "Falsch: Das Skalarprodukt ist nicht der Winkel selbst.", isCorrect: false }
+                ]
+            },
+            {
+                question: "Aufgabe 88: Eine Gerade geht durch $A(1|2|3)$ in Richtung $\\vec{v}=\\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix}$. Welcher Punkt liegt NICHT auf der Geraden?",
+                points: 1, af: "AF 3",
+                answerOptions: [
+                    { text: "$P(2|3|3)$", rationale: "Richtig! Die $x$-Koordinate muss 1 bleiben, hier ist sie 2.", isCorrect: true },
+                    { text: "$P(1|5|3)$", rationale: "Falsch: Dieser Punkt liegt auf der Geraden ($r=3$).", isCorrect: false },
+                    { text: "$P(1|0|3)$", rationale: "Falsch: Dieser Punkt liegt auf der Geraden ($r=-2$).", isCorrect: false }
+                ]
+            },
+            {
+                question: "Aufgabe 97: Liegt $P(4|5|6)$ auf $g: \\vec{x} = \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix} + r \\cdot \\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix}$?",
+                points: 1, af: "AF 3",
+                answerOptions: [
+                    { text: "Ja, für $r = 3$", rationale: "Richtig! $1+3=4, 2+3=5, 3+3=6$.", isCorrect: true },
+                    { text: "Nein", rationale: "Falsch: Der Punkt erfüllt die Gleichung für $r=3$.", isCorrect: false },
+                    { text: "Ja, für $r = 4$", rationale: "Falsch: Dann wäre der Punkt $(5, 6, 7)$.", isCorrect: false }
+                ]
+            },
+            {
+                question: "Aufgabe 108: Zwei Geraden haben dieselben Richtungsvektoren, aber der Stützpunkt der einen liegt nicht auf der anderen. Lagebeziehung?",
+                points: 1, af: "AF 3",
+                answerOptions: [
+                    { text: "Echt parallel", rationale: "Richtig! Gleiche Richtung, aber keine gemeinsamen Punkte.", isCorrect: true },
+                    { text: "Identisch", rationale: "Falsch: Dann müsste der Stützpunkt auf der anderen Geraden liegen.", isCorrect: false },
+                    { text: "Windschief", rationale: "Falsch: Windschiefe Geraden haben unterschiedliche Richtungen.", isCorrect: false }
+                ]
+            },
+            {
+                question: "Zusatz AF3: Ein Vektor $\\vec{v}$ hat die Länge 10. Wie lang ist der Vektor $0,5 \\cdot \\vec{v}$?",
+                points: 1, af: "AF 3",
+                answerOptions: [
+                    { text: "$5$", rationale: "Korrekt! Die Länge skaliert linear mit dem Betrag des Faktors.", isCorrect: true },
+                    { text: "$10$", rationale: "Falsch: Der Vektor wurde verkürzt.", isCorrect: false },
+                    { text: "$2,5$", rationale: "Falsch: Rechenfehler.", isCorrect: false }
+                ]
+            }
+        ];
+
+        let state = {
+            view: 'start',
+            name: '',
+            questions: [],
+            currentIdx: 0,
+            score: 0,
+            maxBE: 20
+        };
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        async function typeset() {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                try {
+                    await MathJax.typesetPromise();
+                } catch (e) {
+                    console.error("MathJax Error:", e);
+                }
+            }
+        }
+
+        function initQuiz() {
+            const lastAttempt = localStorage.getItem(QUIZ_ID);
+            if (lastAttempt) {
+                const diff = Date.now() - parseInt(lastAttempt);
+                if (diff < LOCK_TIME) {
+                    const mins = Math.ceil((LOCK_TIME - diff) / 60000);
+                    renderLocked(mins);
+                    return;
+                }
+            }
+            renderStart();
+        }
+
+        function renderLocked(mins) {
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold accent-text mb-4">Sperre aktiv!</h2>
+                    <p class="text-lg text-slate-300">Du hast das Quiz gerade erst gemacht. Um Schummeln zu verhindern, ist dieses Quiz für 10 Minuten gesperrt.</p>
+                    <p class="mt-4 text-slate-400">Noch ca. <span class="font-bold text-white">${mins} Minute(n)</span> warten.</p>
+                </div>
+            `;
+        }
+
+        function renderStart() {
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <div class="text-center">
+                    <h1 class="text-4xl font-black accent-text mb-2 uppercase italic">Mathe Schreck</h1>
+                    <p class="text-slate-400 mb-8 font-medium">Q2 Vergleichsklausur Training (Vektoren)</p>
+                    <div class="mb-6 text-left bg-slate-900/50 p-4 rounded-xl border border-slate-700">
+                        <p class="text-sm font-bold accent-text mb-2 uppercase">Regeln:</p>
+                        <ul class="text-sm space-y-1 text-slate-300">
+                            <li>• 15 Aufgaben (AF1: 6 BE, AF2: 10 BE, AF3: 4 BE)</li>
+                            <li>• Max. 20 Bewertungseinheiten (BE)</li>
+                            <li>• 10 Min. Sperre nach Abschluss</li>
+                        </ul>
+                    </div>
+                    <input type="text" id="userName" placeholder="Dein Vorname" class="w-full p-4 rounded-xl bg-slate-900 border border-slate-700 mb-6 text-center text-xl focus:accent-border outline-none text-white">
+                    <button onclick="startQuiz()" class="w-full accent-bg py-4 rounded-xl font-bold text-xl hover:opacity-90 transition-all uppercase tracking-widest shadow-lg">Quiz Starten</button>
+                </div>
+            `;
+        }
+
+        async function startQuiz() {
+            const name = document.getElementById('userName').value.trim();
+            if (!name) return alert("Bitte gib deinen Namen ein!");
+            
+            state.name = name;
+            state.questions = shuffle([...quizData]).map(q => {
+                const newQ = {...q};
+                newQ.answerOptions = shuffle([...q.answerOptions]);
+                return newQ;
+            });
+            state.view = 'quiz';
+            await renderQuestion();
+        }
+
+        async function renderQuestion() {
+            const q = state.questions[state.currentIdx];
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <div class="flex justify-between items-center mb-6">
+                    <span class="text-xs font-bold bg-slate-700 px-3 py-1 rounded-full text-slate-300 uppercase">${q.af} | ${q.points} BE</span>
+                    <span class="font-mono text-slate-500">${state.currentIdx + 1} / ${state.questions.length}</span>
+                </div>
+                <h2 class="text-2xl font-semibold mb-8 leading-relaxed">${q.question}</h2>
+                
+                <div class="grid gap-4 mb-8">
+                    ${q.answerOptions.map((opt, i) => `
+                        <button onclick="selectAnswer(${i})" id="opt-${i}" class="text-left p-5 rounded-xl border-2 border-slate-700 hover:border-slate-500 transition-all bg-slate-900/50 relative overflow-hidden group">
+                            <span class="relative z-10 block">${opt.text}</span>
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+            await typeset();
+        }
+
+        async function selectAnswer(index) {
+            const q = state.questions[state.currentIdx];
+            const selected = q.answerOptions[index];
+            const buttons = document.querySelectorAll('[id^="opt-"]');
+            
+            buttons.forEach((btn, i) => {
+                const opt = q.answerOptions[i];
+                btn.disabled = true;
+                btn.classList.remove('border-slate-700', 'hover:border-slate-500');
+                
+                const rat = document.createElement('div');
+                rat.className = "text-xs mt-2 opacity-80 font-normal italic leading-normal border-t border-slate-700 pt-2";
+                rat.innerHTML = opt.rationale;
+                btn.appendChild(rat);
+
+                if (opt.isCorrect) {
+                    btn.classList.add('border-green-500', 'bg-green-900/30');
+                } else if (i === index) {
+                    btn.classList.add('border-red-500', 'bg-red-900/30');
+                }
+            });
+
+            if (selected.isCorrect) state.score += q.points;
+
+            const nextBtn = document.createElement('button');
+            nextBtn.className = "w-full mt-6 accent-bg py-4 rounded-xl font-bold uppercase tracking-widest shadow-lg hover:opacity-90";
+            nextBtn.innerText = (state.currentIdx < state.questions.length - 1) ? "Nächste Frage" : "Zum Ergebnis";
+            nextBtn.onclick = nextQuestion;
+            document.getElementById('app').appendChild(nextBtn);
+            await typeset();
+        }
+
+        function nextQuestion() {
+            if (state.currentIdx < state.questions.length - 1) {
+                state.currentIdx++;
+                renderQuestion();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        async function finishQuiz() {
+            localStorage.setItem(QUIZ_ID, Date.now().toString());
+            const app = document.getElementById('app');
+            const percent = (state.score / state.maxBE) * 100;
+            const timestamp = new Date().toLocaleString('de-DE');
+
+            app.innerHTML = `
+                <div class="text-center" id="result-screen">
+                    <h2 class="text-4xl font-black accent-text mb-6 uppercase tracking-tighter text-white">Ergebnis</h2>
+                    
+                    <div class="bg-slate-900 p-8 rounded-3xl border-2 accent-border mb-8 shadow-inner">
+                        <div class="text-6xl font-black mb-2 text-white">${state.score} / ${state.maxBE}</div>
+                        <div class="text-slate-400 uppercase tracking-widest font-bold text-sm">Bewertungseinheiten</div>
+                        <div class="mt-6 h-4 w-full bg-slate-800 rounded-full overflow-hidden">
+                            <div class="accent-bg h-full transition-all duration-1000" style="width: ${percent}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="text-left space-y-2 mb-8 text-slate-300 font-mono bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-lg">
+                        <p class="flex justify-between border-b border-slate-700 pb-1"><span>👤 Nutzer:</span> <span class="text-white font-bold uppercase">${state.name}</span></p>
+                        <p class="flex justify-between border-b border-slate-700 pb-1 pt-1"><span>📅 Datum:</span> <span class="text-white">${timestamp}</span></p>
+                    </div>
+
+                    <div class="p-6 bg-red-900/20 border-l-4 border-accent-bg rounded-r-2xl text-slate-100 mb-8 text-left">
+                        <p class="font-black text-xl mb-2 uppercase accent-text">📸 WICHTIG:</p>
+                        <p class="text-sm">Mache jetzt einen <strong>Screenshot</strong> dieses Bildschirms und lade ihn im <strong>Schulportal</strong> hoch!</p>
+                    </div>
+
+                    <button onclick="location.reload()" class="w-full py-4 rounded-xl border-2 border-slate-700 text-slate-400 hover:text-white hover:border-slate-500 transition-all font-bold uppercase">Quiz beenden</button>
+                </div>
+            `;
+            await typeset();
+        }
+
+        window.addEventListener('load', initQuiz);
+    </script>
+</body>
+</html>
